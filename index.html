@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="jquery-1.12.3.min.js"></script>
+  <title>bubble</title>
+  <style>
+    @keyframes bubble-anim {
+      0% {
+        -webkit-transform: scale(1) translateY(0);
+        transform: scale(1) translateY(0);
+      }
+
+      20% {
+        -webkit-transform: scaleY(0.95) scaleX(1.05) translateY(2px);
+        transform: scaleY(0.95) scaleX(1.05) translateY(2px);
+      }
+
+      48% {
+        -webkit-transform: scaleY(1.1) scaleX(0.9) translateY(0px);
+        transform: scaleY(1.1) scaleX(0.9) translateY(0px);
+      }
+
+      68% {
+        -webkit-transform: scaleY(0.98) scaleX(1.02) translateY(-2px);
+        transform: scaleY(0.98) scaleX(1.02) translateY(-2px);
+      }
+
+      80% {
+        -webkit-transform: scaleY(1.02) scaleX(0.98) translateY(2px);
+        transform: scaleY(1.02) scaleX(0.98) translateY(2px);
+      }
+
+      97%,
+      100% {
+        -webkit-transform: scale(1) translateY(0);
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* .wrap {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    } */
+    .btn-area{
+      display: flex;
+      justify-content: center;
+    }
+    .btn-area button{
+      width: 100px;
+      height: 40px;
+      color:#fff;
+      background-color: royalblue;
+      border-radius: 5px;
+      border: none;
+      margin: 10px;
+    }
+    .ball-box{
+      width: 840px;
+      height: 840px;
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #000;
+      margin: 0 auto;
+      align-content: flex-start;
+      justify-content: flex-start;
+    }
+
+    .ball{
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      margin: 2px;
+      animation: bubble-anim 2s ease-out infinite;
+      box-sizing: border-box;
+      flex-shrink: 1;
+      position: relative;
+    }
+    .ball:before {
+      content: "";
+      position: absolute;
+      top: 1%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      border-radius: 100%;
+      background: radial-gradient(circle at top, white, rgba(255, 255, 255, 0) 38%);
+      -webkit-filter: blur(5px);
+      filter: blur(5px);
+      z-index: 2;
+    }
+
+    .ball:after {
+      content: "";
+      position: absolute;
+      display: none;
+      top: 5%;
+      left: 10%;
+      width: 80%;
+      height: 80%;
+      border-radius: 100%;
+      -webkit-filter: blur(1px);
+      filter: blur(1px);
+      z-index: 2;
+      -webkit-transform: rotateZ(-30deg);
+      transform: rotateZ(-30deg);
+    }
+
+    /* .ball.blue {
+      background: radial-gradient(circle at bottom, #81e8f6, #76deef 10%, #055194 80%, #062745 100%);
+    } */
+    .ball.gradient {
+      background: radial-gradient(circle at bottom, #f68181, #08a04c 10%, #940505 40%, #026694 60%, #9c09e0 80%, #e09509 100%);
+    }
+    .ball.purple {
+      background: purple;
+    }
+    .ball.green {
+      background: green;
+    }
+    .ball.orange {
+      background: orange;
+      border: 1px solid #fff
+    }
+    .ball.empty{
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="btn-area" id="btnArea"><button data-action="stop">Stop</button><button data-action="start">Start</button></div>
+    <div class="ball-box" id="ballBox">
+      <!-- <div class="ball blue"></div>
+      <div class="ball red"></div>
+      <div class="ball orange"></div>
+      <div class="ball purple"></div> -->
+    </div>
+    <!-- <div class="ball bubble"></div> -->
+  </div>
+  <script>
+    var colorArr = ['gradient', 'purple', 'green', 'orange'];
+    var run = false;
+    var ballBoxDom = $('#ballBox'); 
+    // 得到两个数之间的值方法
+    function selectFrom(lowerValue, upperValue) { 
+        var choices = upperValue - lowerValue + 1; 
+        return Math.floor(Math.random() * choices + lowerValue); 
+    }
+
+    var ballArr = [];
+    function render(){
+      let arr = [];
+      ballArr.forEach(v => {
+        arr.push(`<div class="ball ${v || 'empty'}" data-type="${v || 'empty'}"></div>`);
+        console.log(arr);
+      });
+      ballBoxDom.html(arr.join(''));
+    }
+    function createdBall(){
+      setTimeout(() => {
+        if(run){
+          ballArr.push(colorArr[selectFrom(0,3)]);
+          console.log(ballArr);
+          render();
+          if(ballArr.length < 100){
+            createdBall();
+          }
+        }
+      }, 1000);
+    }
+    createdBall();
+    $('#btnArea').on('click', '[data-action]', function(){
+      var $this = $(this),
+        action = $this.data('action');
+
+        switch(action){
+          case 'stop':
+            run = false;
+            break;
+          case 'start':
+            run = true;
+            createdBall();
+            break;
+        }
+    });
+    ballBoxDom.on({
+      click: function(){
+        let $this = $(this);
+        let type = $this.data('type');
+        switch(type){
+          case 'green':
+          case 'purple':
+          case 'orange':
+          ballArr.forEach((v, i)=>{
+            if(v == type){
+              ballArr[i] = null;
+            }
+          });
+          render();
+          break;
+        }
+      },
+      mouseenter: function(){
+        let $this = $(this);
+        let type = $this.data('type');
+        if(type == 'gradient'){
+          ballArr.forEach((v, i)=>{
+            if(v == type){
+              ballArr[i] = null;
+            }
+          });
+          render();
+        }
+      }
+    }, '.ball')
+  </script>
+</body>
+
+</html>
